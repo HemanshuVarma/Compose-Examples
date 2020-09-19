@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -40,13 +41,21 @@ fun AppThemeContainer(content: @Composable () -> Unit) {
 
 @Composable
 fun ScreenContent(names: List<String> = listOf("Android", "Kotlin", "Compose")) {
-    Column {
-        for (name in names) {
-            Greeting(name = name)
-            Divider(color = Color.Black)
+    //State Hoisting
+    val counterState = remember { mutableStateOf(0) }
+
+    Column(modifier = Modifier.fillMaxHeight()) {
+        Column(modifier = Modifier.weight(1f)) {
+            for (name in names) {
+                Greeting(name = name)
+                Divider(color = Color.Black)
+            }
         }
-        Divider(color = Color.Transparent, thickness = 32.dp)
-        Counter()
+        Counter(count = counterState.value,
+                updateCount = { newCount ->
+                    counterState.value = newCount
+                }
+        )
     }
 }
 
@@ -56,11 +65,11 @@ fun Greeting(name: String) {
 }
 
 @Composable
-fun Counter() {
-    val count = remember { mutableStateOf(0) }
-
-    Button(onClick = { count.value++ }) {
-        Text(text = "Clicked ${count.value} times")
+fun Counter(count: Int, updateCount: (Int) -> Unit) {
+    Button(onClick = { updateCount(count + 1) },
+            backgroundColor = if (count > 5) Color.Green else Color.White
+    ) {
+        Text(text = "Clicked $count times")
     }
 }
 
