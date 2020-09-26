@@ -9,6 +9,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.AlignmentLine
+import androidx.compose.ui.Layout
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout
 import androidx.compose.ui.platform.setContent
@@ -41,6 +42,18 @@ fun Greeting(name: String) {
 }
 
 @Composable
+fun CustomListContent(modifier: Modifier = Modifier) {
+    CustomColumn(modifier = modifier.padding(8.dp)) {
+        Text("Column 1")
+        Text("Column 2")
+        Text("Column 3")
+        Text("Column 4")
+    }
+
+}
+
+//Custom layout composable for rendering single item
+@Composable
 fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) =
     Modifier.layout { measurable, constraints ->
         val placeable = measurable.measure(constraints)
@@ -58,6 +71,34 @@ fun Modifier.firstBaselineToTop(firstBaselineToTop: Dp) =
             placeable.placeRelative(0, placeableY)
         }
     }
+
+//Custom layout composable for rendering list of items
+@Composable
+fun CustomColumn(
+    modifier: Modifier = Modifier,
+    children: @Composable () -> Unit
+) {
+    Layout(modifier = modifier, children = children) { measurables, constraints ->
+
+        // Don't constrain child views further, measure them with given constraints
+        // List of measured children
+        val placeables = measurables.map { measurable ->
+            // Measure each children
+            measurable.measure(constraints = constraints)
+        }
+
+        // Track the y co-ord we have placed children up to
+        var yPosition = 0
+
+        layout(constraints.maxWidth, constraints.maxHeight) {
+            placeables.forEach { placeable ->
+                placeable.placeRelative(x = 0, y = yPosition)
+
+                yPosition += placeable.height
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
